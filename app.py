@@ -22,7 +22,7 @@ GROQ_API_KEY         = os.getenv("GROQ_API_KEY", "")
 GMAIL_ADDRESS        = os.getenv("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD   = os.getenv("GMAIL_APP_PASSWORD", "")
 GOOGLE_SHEET_ID      = os.getenv("GOOGLE_SHEET_ID", "")
-SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
+SERVICE_ACCOUNT_JSON = os.getenv("SERVICE_ACCOUNT_JSON", "")
 TEMPLATES_FILE       = os.getenv("TEMPLATES_FILE", "templates.json")
 
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
@@ -149,7 +149,8 @@ def get_sheet_client():
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
+    service_account_info = json.loads(SERVICE_ACCOUNT_JSON)
+    creds = Credentials.from_service_account_info(service_account_info, scopes=scopes)
     client = gspread.authorize(creds)
     return client.open_by_key(GOOGLE_SHEET_ID).sheet1
 
@@ -282,8 +283,8 @@ def config_status():
     if not GMAIL_ADDRESS:      issues.append("GMAIL_ADDRESS not set")
     if not GMAIL_APP_PASSWORD: issues.append("GMAIL_APP_PASSWORD not set")
     if not GOOGLE_SHEET_ID:    issues.append("GOOGLE_SHEET_ID not set")
-    if not os.path.exists(SERVICE_ACCOUNT_FILE):
-        issues.append("service_account.json not found")
+    if not SERVICE_ACCOUNT_JSON:
+        issues.append("SERVICE_ACCOUNT_JSON not set")
     return jsonify({"ok": len(issues) == 0, "issues": issues,
                     "gmail": GMAIL_ADDRESS, "groq": bool(GROQ_API_KEY)})
 
