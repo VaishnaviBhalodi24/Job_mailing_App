@@ -16,6 +16,8 @@ from bs4 import BeautifulSoup
 load_dotenv()
 
 app = Flask(__name__)
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.urandom(24)
 
 GROQ_API_KEY         = os.getenv("GROQ_API_KEY", "")
